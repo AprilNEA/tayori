@@ -7,7 +7,7 @@ import { stableHash } from 'stable-hash';
 
 import type { SWRConfiguration, Key as SWRKey, Middleware as SWRMiddleware, SWRResponse } from 'swr';
 
-import useSWR, { SWRConfig, useSWRConfig } from 'swr';
+import useSWR, { mutate, SWRConfig, useSWRConfig } from 'swr';
 import { nullthrow } from 'foxact/nullthrow';
 import { useSingleton } from 'foxact/use-singleton';
 
@@ -58,6 +58,7 @@ export interface TayoriProviderProps extends React.PropsWithChildren {
   initClient: () => HeyAPIClientLike
 }
 
+// tayori is just a dummy function, its only purpose is to accept and carry the generic type parameters
 export function tayori<
   SDKOptions extends { client?: unknown, meta?: unknown },
   SDKRequestResult extends Promise<any> = Promise<{
@@ -80,7 +81,7 @@ export function tayori<
       | false
       | (() => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false),
     config?: SWRConfigurationWithOptionalFallback<SWROptions>
-  ) {
+  ): SWRResponse<SdkData<SdkMethod>, unknown, SWROptions> {
     let swrKey: InternalSWRKey<OriginalSdkArg<SdkMethod>> | (() => InternalSWRKey<OriginalSdkArg<SdkMethod>> | null) | null = null;
     if (sdkArg) {
       if (typeof sdkArg === 'function') {
@@ -102,7 +103,7 @@ export function tayori<
 
     // This non-null assertion is only to make the types happy.
     // In the runtime useSWR accepts config as undefined as usual
-    return useSWR(swrKey, null, config!) as SWRResponse<SdkData<SdkMethod>, unknown, SWROptions>;
+    return useSWR(swrKey, null, config!);
   }
 
   // ---------- useMutation ----------
@@ -338,3 +339,18 @@ export function isInternalSWRKey(key: unknown): key is InternalSWRKey {
 export function isZodError(e: unknown): e is ZodError {
   return e != null && typeof e === 'object' && 'issues' in e && Array.isArray(e.issues);
 }
+
+function mutateWithTags(cacheTags: Array<`#${string}`>) {
+  return mutate((key) => {
+    if (!isInternalSWRKey(key)) {
+      return false;
+    }
+    const cacheTagsFromKey = key[2];
+    if (!cacheTagsFromKey?.length) {
+      return false;
+    }
+    return cacheTags.some((tag) => cacheTagsFromKey.includes(tag));
+  });
+}
+
+export { mutateWithTags as unstable_mutateWithTags };
