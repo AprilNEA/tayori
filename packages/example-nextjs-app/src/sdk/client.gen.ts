@@ -13,4 +13,4 @@ import type { ClientOptions as ClientOptions2 } from './types.gen';
  */
 export type CreateClientConfig<T extends ClientOptions = ClientOptions2> = (override?: Config<ClientOptions & T>) => Config<Required<ClientOptions> & T>;
 
-export const client = createClient(createConfig<ClientOptions2>({ baseUrl: 'https://petstore3.swagger.io/api/v3', throwOnError: true }));
+export const client = createClient(createConfig<ClientOptions2>({ baseUrl: 'https://galaxy.scalar.com', throwOnError: true }));

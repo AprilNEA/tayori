@@ -2,224 +2,417 @@
 
 import * as z from 'zod';
 
-export const zOrder = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    petId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    quantity: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    shipDate: z.iso.datetime().optional(),
-    status: z.enum([
-        'placed',
-        'approved',
-        'delivered'
-    ]).optional(),
-    complete: z.boolean().optional()
-});
-
-export const zCategory = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    name: z.string().optional()
-});
-
+/**
+ * A user
+ */
 export const zUser = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    username: z.string().optional(),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    email: z.string().optional(),
-    password: z.string().optional(),
-    phone: z.string().optional(),
-    userStatus: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
-});
-
-export const zTag = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).readonly().optional(),
     name: z.string().optional()
 });
 
-export const zPet = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    name: z.string(),
-    category: zCategory.optional(),
-    photoUrls: z.array(z.string()),
-    tags: z.array(zTag).optional(),
-    status: z.enum([
-        'available',
-        'pending',
-        'sold'
-    ]).optional()
+/**
+ * Credentials to authenticate a user
+ */
+export const zCredentials = z.object({
+    email: z.email()
 });
 
-export const zApiResponse = z.object({
-    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+/**
+ * A token to authenticate a user
+ */
+export const zToken = z.object({
+    token: z.string().optional()
+});
+
+/**
+ * A paginated resource
+ */
+export const zPaginatedResource = z.object({
+    meta: z.object({
+        limit: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+        offset: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+        total: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+        next: z.string().nullish()
+    }).optional()
+});
+
+/**
+ * Message about an image upload
+ */
+export const zImageUploadedMessage = z.object({
+    message: z.string().optional(),
+    imageUrl: z.string().optional(),
+    uploadedAt: z.iso.datetime().optional(),
+    fileSize: z.int().optional(),
+    mimeType: z.string().optional()
+});
+
+/**
+ * RFC 7807 (https://datatracker.ietf.org/doc/html/rfc7807)
+ */
+export const zBadRequestError = z.object({
     type: z.string().optional(),
-    message: z.string().optional()
-});
-
-export const zPet2 = zPet;
-
-/**
- * List of user object
- */
-export const zUserArray = z.array(zUser);
-
-/**
- * Create a new pet in the store
- */
-export const zAddPetBody = zPet;
-
-/**
- * Successful operation
- */
-export const zAddPetResponse = zPet;
-
-/**
- * Update an existent pet in the store
- */
-export const zUpdatePetBody = zPet;
-
-/**
- * Successful operation
- */
-export const zUpdatePetResponse = zPet;
-
-export const zFindPetsByStatusQuery = z.object({
-    status: z.enum([
-        'available',
-        'pending',
-        'sold'
-    ]).default('available')
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for forbidden access (RFC 7807). Returned when the user does not have permission to access the requested resource.
  */
-export const zFindPetsByStatusResponse = z.array(zPet);
-
-export const zFindPetsByTagsQuery = z.object({
-    tags: z.array(z.string())
+export const zForbiddenError = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for resource not found (RFC 7807). Returned when the requested resource does not exist.
  */
-export const zFindPetsByTagsResponse = z.array(zPet);
-
-export const zDeletePetHeaders = z.object({
-    api_key: z.string().optional()
-});
-
-export const zDeletePetPath = z.object({
-    petId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-export const zGetPetByIdPath = z.object({
-    petId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+export const zNotFoundError = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for unauthorized access (RFC 7807). Returned when authentication is required or has failed.
  */
-export const zGetPetByIdResponse = zPet;
-
-export const zUpdatePetWithFormPath = z.object({
-    petId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-export const zUpdatePetWithFormQuery = z.object({
-    name: z.string().optional(),
-    status: z.string().optional()
+export const zUnauthorizedError = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for resource conflicts (RFC 7807). Returned when the request conflicts with the current state of the resource.
  */
-export const zUpdatePetWithFormResponse = zPet;
-
-export const zUploadFileBody = z.string();
-
-export const zUploadFilePath = z.object({
-    petId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-export const zUploadFileQuery = z.object({
-    additionalMetadata: z.string().optional()
+export const zConflict = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for unprocessable entity (RFC 7807). Returned when the request is well-formed but contains semantic errors.
  */
-export const zUploadFileResponse = zApiResponse;
-
-/**
- * successful operation
- */
-export const zGetInventoryResponse = z.record(z.string(), z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }));
-
-export const zPlaceOrderBody = zOrder;
-
-/**
- * successful operation
- */
-export const zPlaceOrderResponse = zOrder;
-
-export const zDeleteOrderPath = z.object({
-    orderId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-export const zGetOrderByIdPath = z.object({
-    orderId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+export const zUnprocessableEntity = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
 });
 
 /**
- * successful operation
+ * Error response for rate limiting (RFC 7807). Returned when the client has exceeded the rate limit for requests.
  */
-export const zGetOrderByIdResponse = zOrder;
+export const zTooManyRequestsError = z.object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    status: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    detail: z.string().optional()
+});
 
 /**
- * Created user object
+ * A user
  */
-export const zCreateUserBody = zUser;
+export const zUserWritable = z.object({
+    name: z.string().optional()
+});
 
 /**
- * successful operation
+ * Credentials to authenticate a user
+ */
+export const zCredentialsWritable = z.object({
+    email: z.email(),
+    password: z.string()
+});
+
+/**
+ * A celestial body which can be either a planet or a satellite
+ */
+export const zCelestialBody = z.union([
+    z.object({
+        type: z.union([
+            z.literal('terrestrial'),
+            z.literal('gas_giant'),
+            z.literal('ice_giant'),
+            z.literal('dwarf'),
+            z.literal('super_earth')
+        ])
+    }).and(z.lazy(() => z.lazy((): any => zPlanet))),
+    z.object({
+        type: z.union([
+            z.literal('moon'),
+            z.literal('asteroid'),
+            z.literal('comet')
+        ])
+    }).and(z.lazy(() => z.lazy((): any => zSatellite)))
+]);
+
+/**
+ * A planet in the Scalar Galaxy
+ */
+export const zPlanet = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).readonly(),
+    name: z.string(),
+    description: z.string().nullish(),
+    type: z.enum([
+        'terrestrial',
+        'gas_giant',
+        'ice_giant',
+        'dwarf',
+        'super_earth'
+    ]).optional(),
+    habitabilityIndex: z.number().gte(0).lte(1).optional(),
+    physicalProperties: z.object({
+        mass: z.number().gt(0).optional(),
+        radius: z.number().gt(0).optional(),
+        gravity: z.number().optional(),
+        temperature: z.object({
+            min: z.number().optional(),
+            max: z.number().optional(),
+            average: z.number().optional()
+        }).optional()
+    }).optional(),
+    atmosphere: z.array(z.object({
+        compound: z.string().optional(),
+        percentage: z.number().lt(100).optional()
+    })).optional(),
+    discoveredAt: z.iso.datetime().optional(),
+    image: z.string().nullish(),
+    satellites: z.array(z.lazy((): any => zSatellite)).optional(),
+    creator: zUser.optional(),
+    tags: z.array(z.string()).optional(),
+    lastUpdated: z.iso.datetime().readonly().optional(),
+    successCallbackUrl: z.url().optional(),
+    failureCallbackUrl: z.url().optional()
+});
+
+/**
+ * Every satellite in the Scalar Galaxy
+ */
+export const zSatellite = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).readonly().optional(),
+    name: z.string(),
+    description: z.string().nullish(),
+    diameter: z.number().optional(),
+    type: z.enum([
+        'moon',
+        'asteroid',
+        'comet'
+    ]).optional(),
+    orbit: z.object({
+        planet: zPlanet.optional(),
+        orbitalPeriod: z.number().optional(),
+        distance: z.number().optional()
+    }).optional()
+});
+
+/**
+ * A celestial body which can be either a planet or a satellite
+ */
+export const zCelestialBodyWritable = z.union([
+    z.object({
+        type: z.union([
+            z.literal('terrestrial'),
+            z.literal('gas_giant'),
+            z.literal('ice_giant'),
+            z.literal('dwarf'),
+            z.literal('super_earth')
+        ])
+    }).and(z.lazy(() => z.lazy((): any => zPlanetWritable))),
+    z.object({
+        type: z.union([
+            z.literal('moon'),
+            z.literal('asteroid'),
+            z.literal('comet')
+        ])
+    }).and(z.lazy(() => z.lazy((): any => zSatelliteWritable)))
+]);
+
+/**
+ * A planet in the Scalar Galaxy
+ */
+export const zPlanetWritable = z.object({
+    name: z.string(),
+    description: z.string().nullish(),
+    type: z.enum([
+        'terrestrial',
+        'gas_giant',
+        'ice_giant',
+        'dwarf',
+        'super_earth'
+    ]).optional(),
+    habitabilityIndex: z.number().gte(0).lte(1).optional(),
+    physicalProperties: z.object({
+        mass: z.number().gt(0).optional(),
+        radius: z.number().gt(0).optional(),
+        gravity: z.number().optional(),
+        temperature: z.object({
+            min: z.number().optional(),
+            max: z.number().optional(),
+            average: z.number().optional()
+        }).optional()
+    }).optional(),
+    atmosphere: z.array(z.object({
+        compound: z.string().optional(),
+        percentage: z.number().lt(100).optional()
+    })).optional(),
+    discoveredAt: z.iso.datetime().optional(),
+    image: z.string().nullish(),
+    satellites: z.array(z.lazy((): any => zSatelliteWritable)).optional(),
+    creator: zUserWritable.optional(),
+    tags: z.array(z.string()).optional(),
+    successCallbackUrl: z.url().optional(),
+    failureCallbackUrl: z.url().optional()
+});
+
+/**
+ * Every satellite in the Scalar Galaxy
+ */
+export const zSatelliteWritable = z.object({
+    name: z.string(),
+    description: z.string().nullish(),
+    diameter: z.number().optional(),
+    type: z.enum([
+        'moon',
+        'asteroid',
+        'comet'
+    ]).optional(),
+    orbit: z.object({
+        planet: zPlanetWritable.optional(),
+        orbitalPeriod: z.number().optional(),
+        distance: z.number().optional()
+    }).optional()
+});
+
+/**
+ * The ID of the planet to get
+ */
+export const zPlanetId = z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' });
+
+/**
+ * The number of items to return
+ */
+export const zLimit = z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).default(BigInt(10));
+
+/**
+ * The number of items to skip before starting to collect the result set
+ */
+export const zOffset = z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).default(BigInt(0));
+
+export const zDeletePlanetPath = z.object({
+    planetId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * No Content
+ */
+export const zDeletePlanetResponse = z.void();
+
+/**
+ * Image to upload
+ */
+export const zUploadImageBody = z.object({
+    image: z.string().optional()
+});
+
+export const zUploadImagePath = z.object({
+    planetId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * Image uploaded
+ */
+export const zUploadImageResponse = zImageUploadedMessage;
+
+/**
+ * User to create
+ */
+export const zCreateUserBody = zUserWritable.and(zCredentialsWritable);
+
+/**
+ * User account created successfully
  */
 export const zCreateUserResponse = zUser;
 
-export const zCreateUsersWithListInputBody = z.array(zUser);
+/**
+ * Body for credentials to authenticate a user
+ */
+export const zGetTokenBody = zCredentialsWritable;
 
 /**
- * Successful operation
+ * Token Created
  */
-export const zCreateUsersWithListInputResponse = zUser;
+export const zGetTokenResponse = zToken;
 
-export const zLoginUserQuery = z.object({
-    username: z.string().optional(),
-    password: z.string().optional()
+/**
+ * Authenticated user information retrieved successfully
+ */
+export const zGetMeResponse = zUser;
+
+export const zGetAllDataQuery = z.object({
+    limit: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional().default(BigInt(10)),
+    offset: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional().default(BigInt(0))
 });
 
 /**
- * successful operation
+ * OK
  */
-export const zLoginUserResponse = z.string();
+export const zGetAllDataResponse = z.object({
+    data: z.array(zPlanet).optional()
+}).and(zPaginatedResource);
 
-export const zDeleteUserPath = z.object({
-    username: z.string()
-});
+/**
+ * Planet
+ */
+export const zCreatePlanetBody = zPlanetWritable;
 
-export const zGetUserByNamePath = z.object({
-    username: z.string()
+/**
+ * Created
+ */
+export const zCreatePlanetResponse = zPlanet;
+
+export const zGetPlanetPath = z.object({
+    planetId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
 });
 
 /**
- * successful operation
+ * Planet Found
  */
-export const zGetUserByNameResponse = zUser;
+export const zGetPlanetResponse = zPlanet;
 
 /**
- * Update an existent user in the store
+ * New information about the planet
  */
-export const zUpdateUserBody = zUser;
+export const zUpdatePlanetBody = zPlanetWritable;
 
-export const zUpdateUserPath = z.object({
-    username: z.string()
+export const zUpdatePlanetPath = z.object({
+    planetId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * Planet updated successfully
+ */
+export const zUpdatePlanetResponse = zPlanet;
+
+/**
+ * Celestial body to create
+ */
+export const zCreateCelestialBodyBody = zCelestialBodyWritable;
+
+/**
+ * Celestial body created
+ */
+export const zCreateCelestialBodyResponse = zCelestialBody;
+
+export const zPostNewPlanetWebhookRequest = z.object({
+    body: zPlanetWritable.optional(),
+    path: z.never().optional(),
+    query: z.never().optional()
 });

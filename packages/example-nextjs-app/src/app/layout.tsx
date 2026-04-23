@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import DataFetchingProvider from './contexts/data-fetching';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'Tayori – Petstore Example',
@@ -14,7 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
-        {children}
+        <DataFetchingProvider>
+          {children}
+        </DataFetchingProvider>
+
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

@@ -2,10 +2,10 @@
 
 import * as z from 'zod';
 
-import type { Client, Options as Options2, TDataShape } from './client';
+import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddPetData, AddPetErrors, AddPetResponses, CreateUserData, CreateUserErrors, CreateUserResponses, CreateUsersWithListInputData, CreateUsersWithListInputErrors, CreateUsersWithListInputResponses, DeleteOrderData, DeleteOrderErrors, DeleteOrderResponses, DeletePetData, DeletePetErrors, DeletePetResponses, DeleteUserData, DeleteUserErrors, DeleteUserResponses, FindPetsByStatusData, FindPetsByStatusErrors, FindPetsByStatusResponses, FindPetsByTagsData, FindPetsByTagsErrors, FindPetsByTagsResponses, GetInventoryData, GetInventoryErrors, GetInventoryResponses, GetOrderByIdData, GetOrderByIdErrors, GetOrderByIdResponses, GetPetByIdData, GetPetByIdErrors, GetPetByIdResponses, GetUserByNameData, GetUserByNameErrors, GetUserByNameResponses, LoginUserData, LoginUserErrors, LoginUserResponses, LogoutUserData, LogoutUserErrors, LogoutUserResponses, PlaceOrderData, PlaceOrderErrors, PlaceOrderResponses, UpdatePetData, UpdatePetErrors, UpdatePetResponses, UpdatePetWithFormData, UpdatePetWithFormErrors, UpdatePetWithFormResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
-import { zAddPetBody, zAddPetResponse, zCreateUserBody, zCreateUserResponse, zCreateUsersWithListInputBody, zCreateUsersWithListInputResponse, zDeleteOrderPath, zDeletePetHeaders, zDeletePetPath, zDeleteUserPath, zFindPetsByStatusQuery, zFindPetsByStatusResponse, zFindPetsByTagsQuery, zFindPetsByTagsResponse, zGetInventoryResponse, zGetOrderByIdPath, zGetOrderByIdResponse, zGetPetByIdPath, zGetPetByIdResponse, zGetUserByNamePath, zGetUserByNameResponse, zLoginUserQuery, zLoginUserResponse, zPlaceOrderBody, zPlaceOrderResponse, zUpdatePetBody, zUpdatePetResponse, zUpdatePetWithFormPath, zUpdatePetWithFormQuery, zUpdatePetWithFormResponse, zUpdateUserBody, zUpdateUserPath, zUploadFileBody, zUploadFilePath, zUploadFileQuery, zUploadFileResponse } from './zod.gen';
+import type { CreateCelestialBodyData, CreateCelestialBodyResponses, CreatePlanetData, CreatePlanetErrors, CreatePlanetResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeletePlanetData, DeletePlanetErrors, DeletePlanetResponses, GetAllDataData, GetAllDataResponses, GetMeData, GetMeErrors, GetMeResponses, GetPlanetData, GetPlanetErrors, GetPlanetResponses, GetTokenData, GetTokenErrors, GetTokenResponses, UpdatePlanetData, UpdatePlanetErrors, UpdatePlanetResponses, UploadImageData, UploadImageErrors, UploadImageResponses } from './types.gen';
+import { zCreateCelestialBodyBody, zCreateCelestialBodyResponse, zCreatePlanetBody, zCreatePlanetResponse, zCreateUserBody, zCreateUserResponse, zDeletePlanetPath, zDeletePlanetResponse, zGetAllDataQuery, zGetAllDataResponse, zGetMeResponse, zGetPlanetPath, zGetPlanetResponse, zGetTokenBody, zGetTokenResponse, zUpdatePlanetBody, zUpdatePlanetPath, zUpdatePlanetResponse, zUploadImageBody, zUploadImagePath, zUploadImageResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -22,184 +22,51 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * Add a new pet to the store.
+ * Get all planets
  *
- * Add a new pet to the store.
+ * It's easy to say you know them all, but do you really? Retrieve all the planets and check whether you missed one.
  */
-export const addPet = <ThrowOnError extends boolean = true>(options: Options<AddPetData, ThrowOnError>) => (options.client ?? client).post<AddPetResponses, AddPetErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: zAddPetBody,
-        path: z.never().optional(),
-        query: z.never().optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zAddPetResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Update an existing pet.
- *
- * Update an existing pet by Id.
- */
-export const updatePet = <ThrowOnError extends boolean = true>(options: Options<UpdatePetData, ThrowOnError>) => (options.client ?? client).put<UpdatePetResponses, UpdatePetErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: zUpdatePetBody,
-        path: z.never().optional(),
-        query: z.never().optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zUpdatePetResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Finds Pets by status.
- *
- * Multiple status values can be provided with comma separated strings.
- */
-export const findPetsByStatus = <ThrowOnError extends boolean = true>(options: Options<FindPetsByStatusData, ThrowOnError>) => (options.client ?? client).get<FindPetsByStatusResponses, FindPetsByStatusErrors, ThrowOnError>({
+export const getAllData = <ThrowOnError extends boolean = true>(options?: Options<GetAllDataData, ThrowOnError>) => (options?.client ?? client).get<GetAllDataResponses, unknown, ThrowOnError>({
     requestValidator: async (data) => await z.object({
         body: z.never().optional(),
         path: z.never().optional(),
-        query: zFindPetsByStatusQuery
+        query: zGetAllDataQuery.optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zFindPetsByStatusResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet/findByStatus',
+    responseValidator: async (data) => await zGetAllDataResponse.parseAsync(data),
+    url: '/planets',
     ...options
 });
 
 /**
- * Finds Pets by tags.
+ * Create a planet
  *
- * Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+ * Time to play god and create a new planet. What do you think? Ah, don't think too much. What could go wrong anyway?
  */
-export const findPetsByTags = <ThrowOnError extends boolean = true>(options: Options<FindPetsByTagsData, ThrowOnError>) => (options.client ?? client).get<FindPetsByTagsResponses, FindPetsByTagsErrors, ThrowOnError>({
+export const createPlanet = <ThrowOnError extends boolean = true>(options?: Options<CreatePlanetData, ThrowOnError>) => (options?.client ?? client).post<CreatePlanetResponses, CreatePlanetErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: z.never().optional(),
-        query: zFindPetsByTagsQuery
-    }).parseAsync(data),
-    responseValidator: async (data) => await zFindPetsByTagsResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet/findByTags',
-    ...options
-});
-
-/**
- * Deletes a pet.
- *
- * Delete a pet.
- */
-export const deletePet = <ThrowOnError extends boolean = true>(options: Options<DeletePetData, ThrowOnError>) => (options.client ?? client).delete<DeletePetResponses, DeletePetErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        headers: zDeletePetHeaders.optional(),
-        path: zDeletePetPath,
-        query: z.never().optional()
-    }).parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet/{petId}',
-    ...options
-});
-
-/**
- * Find pet by ID.
- *
- * Returns a single pet.
- */
-export const getPetById = <ThrowOnError extends boolean = true>(options: Options<GetPetByIdData, ThrowOnError>) => (options.client ?? client).get<GetPetByIdResponses, GetPetByIdErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: zGetPetByIdPath,
-        query: z.never().optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zGetPetByIdResponse.parseAsync(data),
-    security: [{ name: 'api_key', type: 'apiKey' }, { scheme: 'bearer', type: 'http' }],
-    url: '/pet/{petId}',
-    ...options
-});
-
-/**
- * Updates a pet in the store with form data.
- *
- * Updates a pet resource based on the form data.
- */
-export const updatePetWithForm = <ThrowOnError extends boolean = true>(options: Options<UpdatePetWithFormData, ThrowOnError>) => (options.client ?? client).post<UpdatePetWithFormResponses, UpdatePetWithFormErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: zUpdatePetWithFormPath,
-        query: zUpdatePetWithFormQuery.optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zUpdatePetWithFormResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet/{petId}',
-    ...options
-});
-
-/**
- * Uploads an image.
- *
- * Upload image of the pet.
- */
-export const uploadFile = <ThrowOnError extends boolean = true>(options: Options<UploadFileData, ThrowOnError>) => (options.client ?? client).post<UploadFileResponses, UploadFileErrors, ThrowOnError>({
-    bodySerializer: null,
-    requestValidator: async (data) => await z.object({
-        body: zUploadFileBody.optional(),
-        path: zUploadFilePath,
-        query: zUploadFileQuery.optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zUploadFileResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/pet/{petId}/uploadImage',
-    ...options,
-    headers: {
-        'Content-Type': 'application/octet-stream',
-        ...options.headers
-    }
-});
-
-/**
- * Returns pet inventories by status.
- *
- * Returns a map of status codes to quantities.
- */
-export const getInventory = <ThrowOnError extends boolean = true>(options?: Options<GetInventoryData, ThrowOnError>) => (options?.client ?? client).get<GetInventoryResponses, GetInventoryErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
+        body: zCreatePlanetBody.optional(),
         path: z.never().optional(),
         query: z.never().optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zGetInventoryResponse.parseAsync(data),
-    security: [{ name: 'api_key', type: 'apiKey' }],
-    url: '/store/inventory',
-    ...options
-});
-
-/**
- * Place an order for a pet.
- *
- * Place a new order in the store.
- */
-export const placeOrder = <ThrowOnError extends boolean = true>(options?: Options<PlaceOrderData, ThrowOnError>) => (options?.client ?? client).post<PlaceOrderResponses, PlaceOrderErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: zPlaceOrderBody.optional(),
-        path: z.never().optional(),
-        query: z.never().optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zPlaceOrderResponse.parseAsync(data),
-    url: '/store/order',
+    responseValidator: async (data) => await zCreatePlanetResponse.parseAsync(data),
+    security: [
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'basic', type: 'http' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'cookie',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/planets',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -208,40 +75,168 @@ export const placeOrder = <ThrowOnError extends boolean = true>(options?: Option
 });
 
 /**
- * Delete purchase order by identifier.
+ * Delete a planet
  *
- * For valid response try integer IDs with value < 1000. Anything above 1000 or non-integers will generate API errors.
+ * This endpoint was used to delete planets. Unfortunately, that caused a lot of trouble for planets with life. So, this endpoint is now deprecated and should not be used anymore.
  */
-export const deleteOrder = <ThrowOnError extends boolean = true>(options: Options<DeleteOrderData, ThrowOnError>) => (options.client ?? client).delete<DeleteOrderResponses, DeleteOrderErrors, ThrowOnError>({
+export const deletePlanet = <ThrowOnError extends boolean = true>(options: Options<DeletePlanetData, ThrowOnError>) => (options.client ?? client).delete<DeletePlanetResponses, DeletePlanetErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
         body: z.never().optional(),
-        path: zDeleteOrderPath,
+        path: zDeletePlanetPath,
         query: z.never().optional()
     }).parseAsync(data),
-    url: '/store/order/{orderId}',
+    responseValidator: async (data) => await zDeletePlanetResponse.parseAsync(data),
+    security: [
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'basic', type: 'http' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'cookie',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/planets/{planetId}',
     ...options
 });
 
 /**
- * Find purchase order by ID.
+ * Get a planet
  *
- * For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
+ * You'll better learn a little bit more about the planets. It might come in handy once space travel is available for everyone.
  */
-export const getOrderById = <ThrowOnError extends boolean = true>(options: Options<GetOrderByIdData, ThrowOnError>) => (options.client ?? client).get<GetOrderByIdResponses, GetOrderByIdErrors, ThrowOnError>({
+export const getPlanet = <ThrowOnError extends boolean = true>(options: Options<GetPlanetData, ThrowOnError>) => (options.client ?? client).get<GetPlanetResponses, GetPlanetErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
         body: z.never().optional(),
-        path: zGetOrderByIdPath,
+        path: zGetPlanetPath,
         query: z.never().optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zGetOrderByIdResponse.parseAsync(data),
-    url: '/store/order/{orderId}',
+    responseValidator: async (data) => await zGetPlanetResponse.parseAsync(data),
+    url: '/planets/{planetId}',
     ...options
 });
 
 /**
- * Create user.
+ * Update a planet
  *
- * This can only be done by the logged in user.
+ * Sometimes you make mistakes, that's fine. No worries, you can update all planets.
+ */
+export const updatePlanet = <ThrowOnError extends boolean = true>(options: Options<UpdatePlanetData, ThrowOnError>) => (options.client ?? client).put<UpdatePlanetResponses, UpdatePlanetErrors, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: zUpdatePlanetBody.optional(),
+        path: zUpdatePlanetPath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zUpdatePlanetResponse.parseAsync(data),
+    security: [
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'basic', type: 'http' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'cookie',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/planets/{planetId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Upload an image to a planet
+ *
+ * Got a crazy good photo of a planet? Share it with the world!
+ */
+export const uploadImage = <ThrowOnError extends boolean = true>(options: Options<UploadImageData, ThrowOnError>) => (options.client ?? client).post<UploadImageResponses, UploadImageErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    requestValidator: async (data) => await z.object({
+        body: zUploadImageBody.optional(),
+        path: zUploadImagePath,
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zUploadImageResponse.parseAsync(data),
+    security: [
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'basic', type: 'http' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'cookie',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/planets/{planetId}/image',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
+
+/**
+ * Create a celestial body
+ */
+export const createCelestialBody = <ThrowOnError extends boolean = true>(options: Options<CreateCelestialBodyData, ThrowOnError>) => (options.client ?? client).post<CreateCelestialBodyResponses, unknown, ThrowOnError>({
+    requestValidator: async (data) => await z.object({
+        body: zCreateCelestialBodyBody,
+        path: z.never().optional(),
+        query: z.never().optional()
+    }).parseAsync(data),
+    responseValidator: async (data) => await zCreateCelestialBodyResponse.parseAsync(data),
+    security: [
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'basic', type: 'http' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'cookie',
+            name: 'api_key',
+            type: 'apiKey'
+        },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/celestial-bodies',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create a user
+ *
+ * Time to create a user account, eh?
  */
 export const createUser = <ThrowOnError extends boolean = true>(options?: Options<CreateUserData, ThrowOnError>) => (options?.client ?? client).post<CreateUserResponses, CreateUserErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
@@ -250,7 +245,7 @@ export const createUser = <ThrowOnError extends boolean = true>(options?: Option
         query: z.never().optional()
     }).parseAsync(data),
     responseValidator: async (data) => await zCreateUserResponse.parseAsync(data),
-    url: '/user',
+    url: '/user/signup',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -259,18 +254,18 @@ export const createUser = <ThrowOnError extends boolean = true>(options?: Option
 });
 
 /**
- * Creates list of users with given input array.
+ * Get a token
  *
- * Creates list of users with given input array.
+ * Yeah, this is the boring security stuff. Just get your super secret token and move on.
  */
-export const createUsersWithListInput = <ThrowOnError extends boolean = true>(options?: Options<CreateUsersWithListInputData, ThrowOnError>) => (options?.client ?? client).post<CreateUsersWithListInputResponses, CreateUsersWithListInputErrors, ThrowOnError>({
+export const getToken = <ThrowOnError extends boolean = true>(options?: Options<GetTokenData, ThrowOnError>) => (options?.client ?? client).post<GetTokenResponses, GetTokenErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
-        body: zCreateUsersWithListInputBody.optional(),
+        body: zGetTokenBody.optional(),
         path: z.never().optional(),
         query: z.never().optional()
     }).parseAsync(data),
-    responseValidator: async (data) => await zCreateUsersWithListInputResponse.parseAsync(data),
-    url: '/user/createWithList',
+    responseValidator: async (data) => await zGetTokenResponse.parseAsync(data),
+    url: '/auth/token',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -279,82 +274,28 @@ export const createUsersWithListInput = <ThrowOnError extends boolean = true>(op
 });
 
 /**
- * Logs user into the system.
+ * Get authenticated user
  *
- * Log into the system.
+ * Find yourself they say. That's what you can do here.
  */
-export const loginUser = <ThrowOnError extends boolean = true>(options?: Options<LoginUserData, ThrowOnError>) => (options?.client ?? client).get<LoginUserResponses, LoginUserErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: z.never().optional(),
-        query: zLoginUserQuery.optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zLoginUserResponse.parseAsync(data),
-    url: '/user/login',
-    ...options
-});
-
-/**
- * Logs out current logged in user session.
- *
- * Log user out of the system.
- */
-export const logoutUser = <ThrowOnError extends boolean = true>(options?: Options<LogoutUserData, ThrowOnError>) => (options?.client ?? client).get<LogoutUserResponses, LogoutUserErrors, ThrowOnError>({
+export const getMe = <ThrowOnError extends boolean = true>(options?: Options<GetMeData, ThrowOnError>) => (options?.client ?? client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
     requestValidator: async (data) => await z.object({
         body: z.never().optional(),
         path: z.never().optional(),
         query: z.never().optional()
     }).parseAsync(data),
-    url: '/user/logout',
+    responseValidator: async (data) => await zGetMeResponse.parseAsync(data),
+    security: [
+        { scheme: 'basic', type: 'http' },
+        { scheme: 'bearer', type: 'http' },
+        { scheme: 'bearer', type: 'http' },
+        { name: 'X-API-Key', type: 'apiKey' },
+        {
+            in: 'query',
+            name: 'api_key',
+            type: 'apiKey'
+        }
+    ],
+    url: '/me',
     ...options
-});
-
-/**
- * Delete user resource.
- *
- * This can only be done by the logged in user.
- */
-export const deleteUser = <ThrowOnError extends boolean = true>(options: Options<DeleteUserData, ThrowOnError>) => (options.client ?? client).delete<DeleteUserResponses, DeleteUserErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: zDeleteUserPath,
-        query: z.never().optional()
-    }).parseAsync(data),
-    url: '/user/{username}',
-    ...options
-});
-
-/**
- * Get user by user name.
- *
- * Get user detail based on username.
- */
-export const getUserByName = <ThrowOnError extends boolean = true>(options: Options<GetUserByNameData, ThrowOnError>) => (options.client ?? client).get<GetUserByNameResponses, GetUserByNameErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: z.never().optional(),
-        path: zGetUserByNamePath,
-        query: z.never().optional()
-    }).parseAsync(data),
-    responseValidator: async (data) => await zGetUserByNameResponse.parseAsync(data),
-    url: '/user/{username}',
-    ...options
-});
-
-/**
- * Update user resource.
- *
- * This can only be done by the logged in user.
- */
-export const updateUser = <ThrowOnError extends boolean = true>(options: Options<UpdateUserData, ThrowOnError>) => (options.client ?? client).put<UpdateUserResponses, UpdateUserErrors, ThrowOnError>({
-    requestValidator: async (data) => await z.object({
-        body: zUpdateUserBody.optional(),
-        path: zUpdateUserPath,
-        query: z.never().optional()
-    }).parseAsync(data),
-    url: '/user/{username}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });

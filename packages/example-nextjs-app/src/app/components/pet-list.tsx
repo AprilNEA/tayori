@@ -1,17 +1,36 @@
 'use client';
 
-// TODO: wire up tayori here
-// import { tayori } from 'tayori';
-// import { findPetsByStatus } from '@/client/sdk.gen';
+import { useFindPetsByStatus } from '@/lib/tayori';
+import { extractErrorMessage } from 'foxts/extract-error-message';
+import { isZodError } from 'tayori';
+import { prettifyError } from 'zod';
 
 export function PetList() {
-  // const { useData, TayoriProvider } = tayori();
-  // const { data, isLoading } = useData(findPetsByStatus, { query: { status: 'available' } });
+  const { data, isLoading, error } = useFindPetsByStatus(['available']);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return (
+      <p>Failed to load pets:
+        {' '}
+        {
+          isZodError(error)
+            ? prettifyError(error)
+            : extractErrorMessage(error)
+        }
+      </p>
+    );
+  }
+
+  console.log({ data });
 
   return (
     <section>
       <h2>Available Pets</h2>
-      <p><em>Wire up tayori here &mdash; see comments above.</em></p>
+      {JSON.stringify(data, null, 2)}
     </section>
   );
 }
