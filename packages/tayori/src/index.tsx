@@ -6,7 +6,7 @@ import { createContext, startTransition, use, useCallback, useRef, useTransition
 import { stableHash } from 'stable-hash';
 
 import type { SWRConfiguration, Key as SWRKey, Middleware as SWRMiddleware, SWRResponse } from 'swr';
-import type { SWRInfiniteConfiguration, SWRInfiniteResponse } from 'swr/infinite';
+import type { SWRInfiniteConfiguration, SWRInfiniteKeyLoader, SWRInfiniteResponse } from 'swr/infinite';
 
 import useSWR, { mutate, SWRConfig, useSWRConfig } from 'swr';
 import useSWRInfinite from 'swr/infinite';
@@ -120,10 +120,10 @@ export function tayori<
     SWROptions extends SWRInfiniteConfiguration<SdkData<SdkMethod>> = SWRInfiniteConfiguration<SdkData<SdkMethod>>
   >(
     sdkMethod: SdkMethod,
-    getSdkArg: (
-      pageIndex: number,
-      previousPageData: SdkData<SdkMethod> | null
-    ) => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false,
+    getSdkArg: SWRInfiniteKeyLoader<
+      SdkData<SdkMethod>,
+      TayoriSdkArg<SdkMethod> | null | undefined | false
+    >,
     config?: SWRInfiniteConfigurationWithOptionalFallback<SWROptions>
   ): SWRInfiniteResponse<SdkData<SdkMethod>, unknown> {
     const getKey = withKUseDataSwrKey(
