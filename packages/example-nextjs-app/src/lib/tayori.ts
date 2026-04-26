@@ -5,6 +5,7 @@ import type { RequestResult } from '@/sdk/client';
 
 export const {
   useData,
+  useInfinite,
   useMutation,
   TayoriProvider
 } = tayori<Options, RequestResult>();
@@ -20,6 +21,30 @@ export function useGetAllPlanets() {
     getAllData,
     // all request options here are fully typed and have autocompletion!
     { query: {} }
+  );
+};
+
+export const PLANETS_PAGE_SIZE = 5;
+
+// useInfinite drives offset/limit pagination on top of useSWRInfinite.
+// The callback receives pageIndex and the previous page response so we
+// can decide when to stop loading more pages.
+export function useGetAllPlanetsInfinite() {
+  return useInfinite(
+    getAllData,
+    (pageIndex, previousPageData) => {
+      // Stop once we've already fetched up to (or past) the total reported by the server.
+      const total = previousPageData?.meta?.total;
+      if (total != null && pageIndex * PLANETS_PAGE_SIZE >= total) {
+        return null;
+      }
+      return {
+        query: {
+          offset: pageIndex * PLANETS_PAGE_SIZE,
+          limit: PLANETS_PAGE_SIZE
+        }
+      };
+    }
   );
 };
 

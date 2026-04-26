@@ -6,8 +6,10 @@ import { createContext, startTransition, use, useCallback, useRef, useTransition
 import { stableHash } from 'stable-hash';
 
 import type { SWRConfiguration, Key as SWRKey, Middleware as SWRMiddleware, SWRResponse } from 'swr';
+import type { SWRInfiniteConfiguration, SWRInfiniteResponse } from 'swr/infinite';
 
 import useSWR, { mutate, SWRConfig, useSWRConfig } from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import { nullthrow } from 'foxact/nullthrow';
 import { useSingleton } from 'foxact/use-singleton';
 
@@ -34,6 +36,11 @@ type InternalSWRKey<SdkArg = unknown> = [GeneralSdkMethod, SdkArg, cacheTags: Ar
 // SWR doesn't export this type, so I just copy this from SWR impl
 type SWRConfigurationWithOptionalFallback<SWROptions> = SWROptions extends SWRConfiguration
   & Required<Pick<SWRConfiguration, 'fallbackData'>>
+  ? Omit<SWROptions, 'fallbackData'> & Pick<Partial<SWROptions>, 'fallbackData'>
+  : SWROptions;
+
+type SWRInfiniteConfigurationWithOptionalFallback<SWROptions> = SWROptions extends SWRInfiniteConfiguration
+  & Required<Pick<SWRInfiniteConfiguration, 'fallbackData'>>
   ? Omit<SWROptions, 'fallbackData'> & Pick<Partial<SWROptions>, 'fallbackData'>
   : SWROptions;
 
@@ -105,6 +112,33 @@ export function tayori<
     // This non-null assertion is only to make the types happy.
     // In the runtime useSWR accepts config as undefined as usual
     return useSWR(swrKey, null, config!);
+  }
+
+  // ---------- useInfinite ----------
+  function useInfinite<
+    SdkMethod extends GeneralSdkMethod,
+    SWROptions extends SWRInfiniteConfiguration<SdkData<SdkMethod>> = SWRInfiniteConfiguration<SdkData<SdkMethod>>
+  >(
+    sdkMethod: SdkMethod,
+    getSdkArg: (
+      pageIndex: number,
+      previousPageData: SdkData<SdkMethod> | null
+    ) => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false,
+    config?: SWRInfiniteConfigurationWithOptionalFallback<SWROptions>
+  ): SWRInfiniteResponse<SdkData<SdkMethod>, unknown> {
+    const getKey = withKUseDataSwrKey(
+      (pageIndex: number, previousPageData: SdkData<SdkMethod> | null): InternalSWRKey<OriginalSdkArg<SdkMethod>> | null => {
+        const result = getSdkArg(pageIndex, previousPageData);
+        if (!result) {
+          return null;
+        }
+        const { cacheTags, ...restSdkArg } = result;
+        const _restSdkArg = restSdkArg as SDKOptions;
+        return [sdkMethod, _restSdkArg, cacheTags] satisfies InternalSWRKey<OriginalSdkArg<SdkMethod>>;
+      }
+    );
+
+    return useSWRInfinite(getKey, null, config);
   }
 
   // ---------- useMutation ----------
@@ -311,7 +345,7 @@ export function tayori<
     );
   }
 
-  return { useData, TayoriProvider, useMutation };
+  return { useData, useInfinite, TayoriProvider, useMutation };
 }
 
 const kUseDataSwrKey = Symbol('tayori SWR key');
