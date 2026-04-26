@@ -32,6 +32,9 @@ export const PLANETS_PAGE_SIZE = 5;
 export function useGetAllPlanetsInfinite() {
   return useInfinite(
     getAllData,
+    // Same as useSWRInfinite, given the current page index and the previous page
+    // response (in case you are doing cursor based pagination), return the corresponding
+    // sdk request options (fully typed with autocompletion!) or return null/undefined/false to stop fetching more pages.
     (pageIndex, previousPageData) => {
       // Stop once we've already fetched up to (or past) the total reported by the server.
       const total = previousPageData?.meta?.total;
