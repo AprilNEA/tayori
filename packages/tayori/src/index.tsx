@@ -20,7 +20,7 @@ import type { Options as KyOptions } from 'ky';
 type GeneralSdkMethod = (arg: any) => any;
 type SdkReturn<SdkMethod extends GeneralSdkMethod> = Awaited<ReturnType<SdkMethod>>;
 type SdkData<SdkMethod extends GeneralSdkMethod> =
-  SdkReturn<SdkMethod> extends { data: infer D, request: Request, response: Response } ? NonNullable<D> : never;
+  SdkReturn<SdkMethod> extends { data: infer D, request?: Request, response?: Response } ? NonNullable<D> : never;
 
 type OriginalSdkArg<SdkMethod extends GeneralSdkMethod> = Omit<
   NonNullable<Parameters<SdkMethod>[0]>,
