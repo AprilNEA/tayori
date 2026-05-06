@@ -8,13 +8,14 @@ import { stableHash } from 'stable-hash';
 import type { SWRConfiguration, Key as SWRKey, Middleware as SWRMiddleware, SWRResponse } from 'swr';
 import type { SWRInfiniteConfiguration, SWRInfiniteKeyLoader, SWRInfiniteResponse } from 'swr/infinite';
 
-import useSWR, { mutate, SWRConfig, useSWRConfig } from 'swr';
+import useSWR, { mutate, SWRConfig } from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import { nullthrow } from 'foxact/nullthrow';
 import { useSingleton } from 'foxact/use-singleton';
 
 import type { ZodError } from 'zod';
 import type { Options as KyOptions } from 'ky';
+import { noop } from 'foxact/noop';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- this has to be any for TypeScript to proper infer type
 type GeneralSdkMethod = (arg: any) => any;
@@ -67,6 +68,25 @@ export interface TayoriProviderProps extends React.PropsWithChildren {
      * ```
      */
   initClient: () => HeyAPIClientLike
+}
+
+export interface UseMutationOptions<Data = any, Error = any> {
+  onSuccess?: (
+    data: Data,
+    /**
+     * A serialized key that is generated with stable-hash based on the mutation's sdk method and sdk arg. It has nothing
+     * to do with SWR's key, and may be useful for generating unique identifiers for toast notifications.
+     */
+    unique_key_this_is_not_an_swr_key: string
+  ) => void,
+  onError?: (
+    err: Error,
+    /**
+     * A serialized key that is generated with stable-hash based on the mutation's sdk method and sdk arg. It has nothing
+     * to do with SWR's key, and may be useful for generating unique identifiers for toast notifications.
+     */
+    unique_key_this_is_not_an_swr_key: string
+  ) => void
 }
 
 // tayori is just a dummy function, its only purpose is to accept and carry the generic type parameters
@@ -146,15 +166,18 @@ export function tayori<
 
   // ---------- useMutation ----------
   /**
+   * useMutation looks like useSWRMutation, but it doesn't really use useSWRMutation internally.
+   *
    * It should be noted that "useMutation" WILL NOT flush other useSWR/useData hooks' cache.
    * You WILL HAVE TO call mutate() manually if you want to flush the cache after mutation.
+   *
+   * This is intentional. Imagine Hey API generated two SDK methods, `getData` & `updateData`,
+   * they will have different identity and referential equality, so you won't get the same SWR key,
+   * so you really can't get auto invalidation.
    */
-  function useMutation<SdkMethod extends GeneralSdkMethod>(sdkMethod: SdkMethod) {
-    const swrConfig = useSWRConfig();
-    const { onError, onSuccess } = swrConfig;
-
-    const handleError = useStableHandler(onError);
-    const handleSuccess = useStableHandler(onSuccess);
+  function useMutation<SdkMethod extends GeneralSdkMethod>(sdkMethod: SdkMethod, options?: UseMutationOptions<SdkData<SdkMethod>, unknown>) {
+    const onErrorFromHook = useStableHandler(options?.onError || noop);
+    const onSuccessFromHook = useStableHandler(options?.onSuccess || noop);
 
     const client = useSdkClient();
 
@@ -186,11 +209,9 @@ export function tayori<
     const [isMutating, startMutating] = useTransition();
 
     const trigger = useCallback(
-      async (sdkArg: OriginalSdkArg<SdkMethod>) => {
+      async (sdkArg: OriginalSdkArg<SdkMethod>, triggerOptions?: UseMutationOptions<SdkData<SdkMethod>, unknown>) => {
         const mutationStartedAt = Date.now();
         ditchMutationsUntilRef.current = mutationStartedAt;
-
-        const serializedKey = stableHash([sdkMethod, sdkArg]);
 
         const promise = sdkMethod({
           client,
@@ -204,6 +225,11 @@ export function tayori<
           // to make sure the typescript types align with the runtime behavior
           responseStyle: 'fields'
         });
+
+        const handleSuccess = triggerOptions?.onSuccess || onSuccessFromHook;
+        const handleError = triggerOptions?.onError || onErrorFromHook;
+
+        const serializedKey = stableHash([sdkMethod, sdkArg, triggerOptions]);
 
         // we await promise to ensure React can track the promise status
         startMutating(async () => {
@@ -226,7 +252,7 @@ export function tayori<
               });
             });
 
-            handleSuccess(result.data, serializedKey, swrConfig);
+            handleSuccess(result.data, serializedKey);
           }
 
           return result.data as SdkData<SdkMethod>;
@@ -242,13 +268,13 @@ export function tayori<
 
             // we are trying to re-use SWR's onError type, but we don't really have a key here
             // so let's generate one with stable-hash
-            handleError(e, serializedKey, swrConfig);
+            handleError(e, serializedKey);
           }
 
           throw e;
         }
       },
-      [client, handleError, handleSuccess, sdkMethod, setState, swrConfig]
+      [client, sdkMethod, setState, onSuccessFromHook, onErrorFromHook]
     );
 
     const reset = useCallback(() => {
