@@ -9,6 +9,7 @@ import type { SWRConfiguration, Key as SWRKey, Middleware as SWRMiddleware, SWRR
 import type { SWRInfiniteConfiguration, SWRInfiniteKeyLoader, SWRInfiniteResponse } from 'swr/infinite';
 
 import useSWR, { mutate, SWRConfig } from 'swr';
+import useSWRImmutable from 'swr/immutable';
 import useSWRInfinite from 'swr/infinite';
 import { nullthrow } from 'foxact/nullthrow';
 import { useSingleton } from 'foxact/use-singleton';
@@ -113,28 +114,29 @@ export function tayori<
       | (() => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false),
     config?: SWRConfigurationWithOptionalFallback<SWROptions>
   ): SWRResponse<SdkData<SdkMethod>, unknown, SWROptions> {
-    let swrKey: InternalSWRKey<OriginalSdkArg<SdkMethod>> | (() => InternalSWRKey<OriginalSdkArg<SdkMethod>> | null) | null = null;
-    if (sdkArg) {
-      if (typeof sdkArg === 'function') {
-        swrKey = withKUseDataSwrKey((): InternalSWRKey<SDKOptions> | null => {
-          const result = sdkArg();
-          if (!result) {
-            return null;
-          }
-          const { cacheTags, ...restSdkArg } = result;
-          const _restSdkArg = restSdkArg as any;
-          return [sdkMethod, _restSdkArg, cacheTags] satisfies InternalSWRKey<OriginalSdkArg<SdkMethod>>;
-        });
-      } else {
-        const { cacheTags, ...restSdkArg } = sdkArg;
-        const _restSdkArg = restSdkArg as any;
-        swrKey = withKUseDataSwrKey([sdkMethod, _restSdkArg, cacheTags] satisfies InternalSWRKey<OriginalSdkArg<SdkMethod>>);
-      }
-    }
-
-    // This non-null assertion is only to make the types happy.
+    // This non-null assertion is only to make the overloaded types happy.
     // In the runtime useSWR accepts config as undefined as usual
-    return useSWR(swrKey, null, config!);
+    return useSWR(getSwrKeyFromSdkArg<SdkMethod, SDKOptions>(sdkMethod, sdkArg), null, config!);
+  }
+
+  // ---------- useDataImmutable ----------
+  function useDataImmutable<
+    SdkMethod extends GeneralSdkMethod,
+    SWROptions extends SWRConfiguration<SdkData<SdkMethod>> = SWRConfiguration<SdkData<SdkMethod>>
+  >(
+    sdkMethod: SdkMethod,
+    sdkArg:
+      | TayoriSdkArg<SdkMethod>
+      | null
+      | undefined
+      | 0
+      | false
+      | (() => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false),
+    config?: SWRConfigurationWithOptionalFallback<SWROptions>
+  ): SWRResponse<SdkData<SdkMethod>, unknown, SWROptions> {
+    // This non-null assertion is only to make the overloaded types happy.
+    // In the runtime useSWR accepts config as undefined as usual
+    return useSWRImmutable(getSwrKeyFromSdkArg<SdkMethod, SDKOptions>(sdkMethod, sdkArg), null, config!);
   }
 
   // ---------- useInfinite ----------
@@ -374,10 +376,35 @@ export function tayori<
     );
   }
 
-  return { useData, useInfinite, TayoriProvider, useMutation };
+  return { useData, useDataImmutable, useInfinite, TayoriProvider, useMutation };
 }
 
 const kUseDataSwrKey = Symbol('tayori SWR key');
+
+function getSwrKeyFromSdkArg<SdkMethod extends GeneralSdkMethod, SDKOptions>(
+  sdkMethod: SdkMethod,
+  sdkArg:
+    | TayoriSdkArg<SdkMethod>
+    | null
+    | undefined
+    | 0
+    | false
+    | (() => TayoriSdkArg<SdkMethod> | null | undefined | 0 | false)
+): InternalSWRKey<SDKOptions> | (() => InternalSWRKey<SDKOptions> | null) | null {
+  if (!sdkArg) return null;
+  if (typeof sdkArg === 'function') {
+    return withKUseDataSwrKey((): InternalSWRKey<SDKOptions> | null => {
+      const result = sdkArg();
+      if (!result) return null;
+      const { cacheTags, ...restSdkArg } = result;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- our sdk arg is too complicated for omit to get proper types, so we just assert it as any here
+      return [sdkMethod, restSdkArg as any, cacheTags];
+    });
+  }
+  const { cacheTags, ...restSdkArg } = sdkArg;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- our sdk arg is too complicated for omit to get proper types, so we just assert it as any here
+  return withKUseDataSwrKey<InternalSWRKey<SDKOptions>>([sdkMethod, restSdkArg as any, cacheTags]);
+}
 
 function withKUseDataSwrKey<T extends SWRKey>(key: T): T & { [kUseDataSwrKey]: true } {
   return Object.defineProperty(key, kUseDataSwrKey, {
