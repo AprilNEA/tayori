@@ -103,7 +103,7 @@ const styles = stylex.create({
     rowGap: 6,
     columnGap: 6,
     justifyContent: 'center',
-    marginBottom: 8
+    marginBottom: 24
   },
   pill: {
     fontSize: 12,
@@ -113,7 +113,6 @@ const styles = stylex.create({
     borderStyle: 'solid',
     borderColor: '#e5e0d8',
     backgroundColor: '#ffffff',
-    marginBottom: 24,
     display: 'inline-flex',
     alignItems: 'center',
     rowGap: 5,
@@ -128,8 +127,7 @@ const styles = stylex.create({
     display: 'grid',
     gridTemplateColumns: {
       default: '1fr 1fr 1fr 1fr 1fr 1fr',
-      '@media (max-width: 640px)': '1fr 1fr',
-      '@media (max-width: 400px)': '1fr'
+      '@media (max-width: 640px)': '1fr'
     },
     rowGap: 7,
     columnGap: 7
@@ -153,7 +151,7 @@ const styles = stylex.create({
   bentoWide: {
     gridColumn: {
       default: 'span 3',
-      '@media (max-width: 400px)': 'span 1'
+      '@media (max-width: 640px)': 'span 1'
     }
   },
   // bentoLabel: {
