@@ -1,79 +1,59 @@
 <h1 align="center">📬 tayori</h1>
 <p align="center"><sup>(便り, <em>news from afar</em> in Japanese)</sup></p>
-<p align="center">An opinionated React client-side data fetching stack that works well with server-side rendering, built with Ky, SWR, Zod, and Hey API</p>
+<p align="center">An opinionated React client-side data fetching stack built on top of SWR and Hey API</p>
+
+The documentation can be found at [https://tayori.skk.moe](https://tayori.skk.moe).
+
+The LLM friendly version of the documentation can be found at [https://tayori.skk.moe/llms-full.txt](https://tayori.skk.moe/llms-full.txt).
+
+Usage example can be found in the [example-nextjs-app](../example-nextjs-app).
 
 ----
 
-**`tayori` is created from many internal applications. Though have been running stable in production for some time, the OSS version of `tayori` is still in early development stage.**
-
-## Usage
-
 ```tsx
-// @/lib/tayori.ts
-import { tayori } from 'tayori';
-import type { Options } from 'path/to/hey-api-generated-sdk';
-import type { RequestResult } from 'path/to/hey-api-generated-sdk/client';
-
-export const {
-  useData,
-  useInfinite,
-  useMutation,
-  TayoriProvider
-} = tayori<Options, RequestResult>();
-
-import { getData, getAllData, updateData } from 'path/to/hey-api-generated-sdk';
-
-// data fetching
-export function useGetData() {
-  return useData(getData, { /* request options */ });
-}
-const { data, error, isLoading } = useGetData();
-
-// mutation
-export function useUpdateData() {
-  return useMutation(updateData);
-}
-const { trigger, data, error, isMutating } = useUpdateData();
-// in your event handler
-await trigger({ /* request options */ });
-
-// infinite loading like "Load More" or cursor-based pagination
-export function useListData() {
-  return useInfinite(getAllData, (pageIndex, previousPageData) => {
-    if (previousPageData && !previousPageData.hasMore) return null;
-    const nextCursor = previousPageData?.meta?.nextCursor;
-    if (!nextCursor && pageIndex > 0) return null;
-
-    return {
-      /* request options */
-      query: { cursor: previousPageData?.meta?.nextCursor }
-    };
-  });
-}
-// `data` is an array of pages
-const { data: pages, size, setSize, isLoading } = useListData();
-
-// wrap <TayoriProvider /> around your app with your own provider.
-'use client';
-import { createClient } from 'path/to/hey-api-generated-sdk/client';
-
-export function RootProvider({ children }: React.PropsWithChildren) {
-  // you can inject auth to your client here since it is within React
-  // const { getTokenSilently } = useExampleAuth();
-
-  return (
-    <TayoriProvider initClient={() => createClient(/* Hey API SDK Client options */)}>
-      {children}
-    </TayoriProvider>
-  );
-}
+const { data, error } = useData(
+  getAllPlanets,
+  {
+    query: { page: 1, per_page: 20 }
+  }
+);
 ```
 
-Full example can be found in the [example-nextjs-app](./packages/example-nextjs-app).
+```tsx
+const { data, error } = useData(
+  getAllPlanets,
+  searchQuery
+    ? { query: { q: searchQuery } }
+    : null
+);
+```
 
-## License
+```tsx
+const { data } = useData(
+  getPlanetById,
+  () => (astronomer?.asteroidNamedAfter
+    ? { id: astronomer.asteroidNamedAfter }
+    : null)
+);
+```
 
-[MIT](LICENSE)
+```tsx
+const { trigger, isMutating } = useMutation(updatePlanet);
+
+await trigger({
+  path: { planetId },
+  body: { name: nextName }
+});
+```
+
+```tsx
+const { data, size, setSize } = useInfinite(
+  getAllPlanets,
+  (i, prev) => (prev?.nextCursor
+    ? { query: { cursor: prev.nextCursor, perPage: 20 } }
+    : null)
+);
+```
 
 ----
 
