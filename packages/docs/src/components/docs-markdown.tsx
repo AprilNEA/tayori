@@ -60,11 +60,11 @@ const styles = stylex.create({
     fontSize: 14.5,
     lineHeight: 1.78,
     color: '#6a7282',
-    marginBottom: 12,
-    overflowWrap: 'anywhere',
-    ':last-child': {
-      marginBottom: 0
-    }
+    marginBottom: {
+      default: 12,
+      ':last-child': 0
+    },
+    overflowWrap: 'anywhere'
   },
   strong: {
     color: '#1c1915',
@@ -111,14 +111,14 @@ const styles = stylex.create({
   list: {
     marginTop: '8px',
     marginRight: '0',
-    marginBottom: '14px',
+    marginBottom: {
+      default: '14px',
+      ':last-child': '0'
+    },
     marginLeft: '20px',
     fontSize: 14.5,
     color: '#6a7282',
-    lineHeight: 1.72,
-    ':last-child': {
-      marginBottom: 0
-    }
+    lineHeight: 1.72
   },
   listItem: {
     marginBottom: 4

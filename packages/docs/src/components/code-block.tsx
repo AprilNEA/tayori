@@ -7,13 +7,15 @@ import { CopyButton } from './copy-button';
 const styles = stylex.create({
   wrap: {
     position: 'relative',
-    marginBlock: '14px',
-    marginInline: '0',
+    marginTop: '14px',
+    marginBottom: {
+      default: '14px',
+      ':last-child': '0'
+    },
+    marginLeft: '0',
+    marginRight: '0',
     minWidth: 0,
-    maxWidth: '100%',
-    ':last-child': {
-      marginBottom: 0
-    }
+    maxWidth: '100%'
   }
 });
 
