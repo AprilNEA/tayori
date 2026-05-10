@@ -54,6 +54,13 @@ const styles = stylex.create({
     marginBottom: 'clamp(20px,3vw,28px)',
     marginLeft: 'auto'
   },
+  link: {
+    color: '#0e7490',
+    textDecoration: {
+      default: 'none',
+      ':hover': 'underline'
+    }
+  },
   actions: {
     display: 'flex',
     alignItems: 'center',
@@ -280,7 +287,11 @@ export async function Hero() {
         {/* ── Description ─────────────────────────────────────── */}
         <p {...stylex.props(styles.sub)}>
           <Balancer>
-            An opinionated React client-side data fetching stack built on top of SWR and Hey API.
+            An opinionated React client-side data fetching stack built on top of
+            {' '}
+            <a href="https://swr.vercel.app" target="_blank" rel="noopener noreferrer" {...stylex.props(styles.link)}>SWR</a>
+            {' '}and{' '}
+            <a href="https://heyapi.dev" target="_blank" rel="noopener noreferrer" {...stylex.props(styles.link)}>Hey API</a>.
           </Balancer>
         </p>
 

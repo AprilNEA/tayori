@@ -1,12 +1,12 @@
 <h1 align="center">📬 tayori</h1>
 <p align="center"><sup>(便り, <em>news from afar</em> in Japanese)</sup></p>
-<p align="center">An opinionated React client-side data fetching stack built on top of SWR and Hey API</p>
+<p align="center">An opinionated React client-side data fetching stack built on top of <a href="https://swr.vercel.app/">SWR</a> and <a href="https://heyapi.dev/">Hey API</a></p>
 
 The documentation can be found at [https://tayori.skk.moe](https://tayori.skk.moe).
 
 The LLM friendly version of the documentation can be found at [https://tayori.skk.moe/llms-full.txt](https://tayori.skk.moe/llms-full.txt).
 
-Usage example can be found in the [example-nextjs-app](../example-nextjs-app).
+Usage example can be found in the [`example-nextjs-app`](https://github.com/SukkaW/tayori/tree/master/packages/example-nextjs-app).
 
 ----
 
