@@ -248,7 +248,7 @@ export function tayori<
     // So if trigger is called multiple times in a short time, only the latest one will be applied.
     const ditchMutationsUntilRef = useRef(0);
 
-    const [stateRef, stateDependenciesRef, setState] = useStateWithDeps<{
+    const [snap, setState] = useStateWithDeps<{
       data: SdkData<SdkMethod> | undefined,
       error: unknown | undefined
     }>({
@@ -451,13 +451,15 @@ export function tayori<
     return {
       trigger,
       reset,
+      // Read through the tracked snapshot lazily so a property only becomes a
+      // rendering dependency (and thus a re-render trigger) when the consumer
+      // actually accesses it. Spreading `snap` would eagerly read every
+      // property and defeat the re-render reduction.
       get data() {
-        stateDependenciesRef.current.data = true;
-        return stateRef.current.data;
+        return snap.data;
       },
       get error() {
-        stateDependenciesRef.current.error = true;
-        return stateRef.current.error;
+        return snap.error;
       },
       isMutating
     } as const;

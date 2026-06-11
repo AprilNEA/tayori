@@ -37,14 +37,14 @@
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
   "dependencies": {
-    "foxact": "^0.3.4",
+    "foxact": "^0.3.5",
     "stable-hash": "^0.0.6"
   },
   "devDependencies": {
-    "@swc/core": "^1.15.33",
-    "@types/react": "^19.2.14",
-    "bunchee": "^6.10.0",
-    "react": "^19.2.6",
+    "@swc/core": "^1.15.41",
+    "@types/react": "^19.2.17",
+    "bunchee": "^6.11.0",
+    "react": "^19.2.7",
     "swr": "^2.4.1",
     "zod": "4.3.6"
   },
