@@ -159,20 +159,48 @@ export const useAllPlanets = (pageIndex?: number, perPage?: number) => {
 };
 ```
 
-> **DO NOT spread the return value of `useData`!**
+> **Destructuring is safe (and recommended) — but DO NOT spread the return value of `useData`!**
 >
-> `useData` uses a re-render reduction optimization technique, that can track if you have accessed specific fields, and only re-render when actually used fields change.
+> `useData` uses a re-render reduction optimization technique: each field of the return value (`data`, `error`, `isLoading`, etc.) only becomes a re-render dependency once you actually access it, so your component only re-renders when the fields it actually reads change.
 >
-> Spreading the return value of `useData` will break this optimization and cause unnecessary re-renders.
+> Destructuring works perfectly with this optimization — it only accesses the fields you name:
 >
 > ```tsx
-> // DON'T DO THIS
+> // ✅ SAFE — only `data` and `isLoading` are accessed, so the
+> // component only re-renders when `data` or `isLoading` change
+> const { data, isLoading } = useAllPlanets();
+> ```
+>
+> Spreading (`...`), on the other hand, eagerly accesses **every** field at once, so every field becomes a re-render dependency — breaking the optimization and causing unnecessary re-renders:
+>
+> ```tsx
+> // ❌ DON'T DO THIS — spreading eagerly reads every field, causing
+> // re-renders whenever ANY field changes, even the ones you never use
 > export const useAllPlanets = (pageIndex?: number, perPage?: number) => {
 >   return {
 >     ...useData(getAllPlanets, { query: { page: pageIndex, per_page: perPage } }),
 >     someOtherField: 'someValue'
 >   };
 > };
+> ```
+>
+> If your custom hook needs to return extra values alongside `useData`'s result, "proxy" the fields with getters instead of spreading. A getter defers the field access to the call site, so a field still only becomes a re-render dependency when the consumer actually reads it:
+>
+> ```tsx
+> // ✅ SAFE — getters keep the field accesses lazy, so the optimization
+> // stays intact while callers can still destructure a flat object
+> export const useAllPlanets = (pageIndex?: number, perPage?: number) => {
+>   const result = useData(getAllPlanets, { query: { page: pageIndex, per_page: perPage } });
+>   return {
+>     get data() { return result.data; },
+>     get error() { return result.error; },
+>     get isLoading() { return result.isLoading; },
+>     get mutate() { return result.mutate; },
+>     someOtherField: 'someValue'
+>   };
+> };
+>
+> const { data, isLoading, someOtherField } = useAllPlanets();
 > ```
 
 ### Conditional Fetching
@@ -327,10 +355,9 @@ We also recommend you to wrap `useMutation` with your own custom hooks for bette
 export const useCreatePlanet = () => useMutation(createPlanet);
 ```
 
-> **DO NOT spread the return value of `useMutation`!**
+> **Destructuring is safe — but DO NOT spread the return value of `useMutation`!**
 >
-> Just like `useData`, `useMutation` also uses the same re-redender reduction optimization technique.
-> Spreading the return value of `useMutation` will break this optimization and cause unnecessary re-renders.
+> Just like `useData`, `useMutation` also uses the same re-render reduction optimization technique. Destructuring (`const { trigger, isMutating } = useMutation(...)`) only accesses the fields you name and keeps the optimization intact, while spreading eagerly accesses every field, breaking the optimization and causing unnecessary re-renders.
 
 ### Mutation Options
 
@@ -491,10 +518,9 @@ const { data: pages, size, setSize, isLoading, mutate } = useInfinite(
 
 `useInfinite` accepts the Hey API generated SDK method as the first argument, a "getRequestOptions" function as the second argument, and an optional SWR options as the third argument.
 
-> **DO NOT spread the return value of `useInfinite`!**
+> **Destructuring is safe — but DO NOT spread the return value of `useInfinite`!**
 >
-> Just like `useData`, `useInfinite` also uses the same re-redender reduction optimization technique.
-> Spreading the return value of `useInfinite` will break this optimization and cause unnecessary re-renders.
+> Just like `useData`, `useInfinite` also uses the same re-render reduction optimization technique. Destructuring (`const { data, size, setSize } = useInfinite(...)`) only accesses the fields you name and keeps the optimization intact, while spreading eagerly accesses every field, breaking the optimization and causing unnecessary re-renders.
 
 ### Return Values
 
