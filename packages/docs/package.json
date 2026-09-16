@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@shikijs/transformers": "^4.4.3",
-    "foxact": "^0.3.8",
+    "foxact": "^0.3.11",
     "foxmd": "^0.3.3",
-    "next": "^16.3.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-wrap-balancer": "^1.1.1",
     "shiki": "^4.4.3",
     "ts-dedent": "^2.3.0",
@@ -22,15 +22,15 @@
     "@fontsource/instrument-sans": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/noto-sans-jp": "^5.3.0",
-    "@stylexjs/babel-plugin": "^0.19.0",
-    "@stylexjs/stylex": "^0.19.0",
+    "@stylexjs/babel-plugin": "^0.19.1",
+    "@stylexjs/stylex": "^0.19.1",
     "@types/node": "^20.19.43",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "babel-plugin-react-compiler": "^1.0.0",
-    "cfpages-early-hints": "^0.1.4",
+    "cfpages-early-hints": "^1.0.0",
     "raw-loader": "^4.0.2",
     "schema-dts": "^2.0.0",
-    "stylex-webpack": "^0.4.13"
+    "stylex-webpack": "^0.5.0"
   }
 }

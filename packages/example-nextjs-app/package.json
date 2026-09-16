@@ -10,20 +10,20 @@
   },
   "dependencies": {
     "foxts": "^5.9.1",
-    "ky": "^2.0.2",
-    "next": "16.2.4",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "ky": "^2.1.0",
+    "next": "16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "sonner": "^2.0.8",
     "swr": "^2.5.1",
     "tayori": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.98.2",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/node": "^24.13.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "babel-plugin-react-compiler": "^1.0.0"
   }
 }
