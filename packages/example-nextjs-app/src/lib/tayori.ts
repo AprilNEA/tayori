@@ -3,15 +3,12 @@ import { getAllData, createPlanet } from '@/sdk';
 import type { Options } from '@/sdk';
 import type { RequestResult } from '@/sdk/client';
 
-const hooks = tayori<Options, RequestResult>();
-
-export const useData: ReturnType<typeof tayori<Options, RequestResult>>['useData'] = hooks.useData;
-
 export const {
+  useData,
   useInfinite,
   useMutation,
   TayoriProvider
-} = hooks;
+} = tayori<Options, RequestResult>();
 
 // Typically we want to export a custom hook that wraps useData and useMutation with our SDK methods
 // instead of using those two hooks directly in your application.

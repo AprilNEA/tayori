@@ -8,8 +8,6 @@ The LLM friendly version of the documentation can be found at [https://tayori.sk
 
 Usage example can be found in the [`example-nextjs-app`](https://github.com/SukkaW/tayori/tree/master/packages/example-nextjs-app).
 
-Use [`unstable_useMutateWithTags`](https://tayori.skk.moe/#cache-tag-invalidation) to invalidate tagged queries in the current SWR cache provider.
-
 ----
 
 ```tsx
