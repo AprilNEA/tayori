@@ -7,12 +7,13 @@
   },
   "scripts": {
     "build": "pnpm --filter tayori build",
+    "test": "pnpm --filter example-nextjs-app test",
     "lint": "eslint --format=sukka .",
     "typecheck": "tsc --build --noEmit",
     "example:dev": "pnpm --filter example-nextjs-app dev",
     "docs:dev": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
-    "prerelease": "pnpm run build && pnpm run lint && pnpm run typecheck",
+    "prerelease": "pnpm run build && pnpm run test && pnpm run lint && pnpm run typecheck",
     "release": "bumpp packages/tayori/package.json --install -r --commit \"release: %s\" --tag \"%s\""
   },
   "devDependencies": {

@@ -205,9 +205,7 @@ export function tayori<
         if (!result) {
           return null;
         }
-        const { cacheTags, ...restSdkArg } = result;
-        const _restSdkArg = restSdkArg as SDKOptions;
-        return [sdkMethod, _restSdkArg, cacheTags] satisfies InternalSWRKey<OriginalSdkArg<SdkMethod>>;
+        return getSwrKeyFromSdkArg<SdkMethod, SDKOptions>(sdkMethod, result);
       }
     );
 
@@ -708,9 +706,7 @@ function getSwrKeyFromSdkArg<SdkMethod extends GeneralSdkMethod, SDKOptions>(
     return withKUseDataSwrKey((): InternalSWRKey<SDKOptions> | null => {
       const result = sdkArg();
       if (!result) return null;
-      const { cacheTags, ...restSdkArg } = result;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- our sdk arg is too complicated for omit to get proper types, so we just assert it as any here
-      return [sdkMethod, restSdkArg as any, cacheTags];
+      return getSwrKeyFromSdkArg<SdkMethod, SDKOptions>(sdkMethod, result);
     });
   }
   const { cacheTags, ...restSdkArg } = sdkArg;
@@ -736,19 +732,29 @@ export function isInternalSWRKey(key: unknown): key is InternalSWRKey {
   return !!(key && (typeof key === 'function' || Array.isArray(key)) && kUseDataSwrKey in key && key[kUseDataSwrKey]);
 }
 
-function mutateWithTags(cacheTags: Array<`#${string}`>) {
-  return mutate((key) => {
-    if (!isInternalSWRKey(key)) {
-      return false;
-    }
-    const cacheTagsFromKey = key[2];
-    if (!cacheTagsFromKey?.length) {
-      return false;
-    }
-    return cacheTags.some((tag) => cacheTagsFromKey.includes(tag));
-  });
+function matchesCacheTags(key: unknown, cacheTags: Array<`#${string}`>) {
+  if (!isInternalSWRKey(key)) {
+    return false;
+  }
+  const cacheTagsFromKey = key[2];
+  if (!cacheTagsFromKey?.length) {
+    return false;
+  }
+  return cacheTags.some((tag) => cacheTagsFromKey.includes(tag));
 }
 
-export { mutateWithTags as unstable_mutateWithTags };
+function mutateWithTags(cacheTags: Array<`#${string}`>) {
+  return mutate(key => matchesCacheTags(key, cacheTags));
+}
+
+function useMutateWithTags() {
+  const { mutate: swrMutate } = useSWRConfig();
+  return useCallback(
+    (cacheTags: Array<`#${string}`>) => swrMutate(key => matchesCacheTags(key, cacheTags)),
+    [swrMutate]
+  );
+}
+
+export { mutateWithTags as unstable_mutateWithTags, useMutateWithTags as unstable_useMutateWithTags };
 
 export { isZodError } from './_is-zod-error';

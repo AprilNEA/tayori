@@ -432,6 +432,26 @@ const { trigger, isMutating } = useMutation(getPlanetById, { populateCache: true
 trigger({ query: { id: 'earth' } }, { populateCache: true });
 ```
 
+### Cache Tag Invalidation
+
+Add `cacheTags` to queries that must refresh together. After a successful mutation, call the function returned by `unstable_useMutateWithTags` with the affected tags.
+
+```tsx
+import { unstable_useMutateWithTags } from 'tayori';
+
+const invalidateTags = unstable_useMutateWithTags();
+const { data } = useData(getAllPlanets, { cacheTags: ['#planets'] });
+const { trigger } = useMutation(createPlanet);
+
+// Inside the submission handler:
+await trigger({ body: formData });
+await invalidateTags(['#planets']);
+```
+
+The hook uses the nearest `SWRConfig` cache provider. The standalone `unstable_mutateWithTags` function uses only SWR's default cache.
+
+For `useInfinite`, use the `mutate` function returned by that hook to refresh the loaded pages. Tag invalidation does not revalidate the infinite list's aggregate cache.
+
 ## Pagination and Infinite Loading
 
 Typically, you can achieve pagination with `useData` by passing the parameters as the request options:
